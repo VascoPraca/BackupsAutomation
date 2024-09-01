@@ -2,8 +2,7 @@
 
 For now both scripts are designed to automate the backup of the Documents directory.
 
-#To-do
-
+# To-do
 - Add error handling
 - Add a way to send notifications
 - Use configuration files
