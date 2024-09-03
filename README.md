@@ -5,7 +5,6 @@ For now both scripts are designed to automate the backup of the Documents direct
 # To-do
 - Add error handling
 - Add a way to send notifications
-- Use configuration files
 - Make a rotation and retention policy
 - Support for multiple directories
 - Compression
