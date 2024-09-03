@@ -1,5 +1,8 @@
 import os
 import shutil
+import smtplib
+
+from email.mime.text import MIMEText
 
 source_directory = os.path.expanduser('~/Documents')
 backup_directory = os.path.expanduser('~/backups')
