@@ -1,8 +1,26 @@
 import os
 import shutil
-import smtplib
+import requests
+import configparser
 
-from email.mime.text import MIMEText
+# Determine path to config.ini
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(script_dir, 'config.ini')
+
+# Load config file
+config = configparser.ConfigParser()
+config.read(config_path)
+
+def send_slack_notification(message):
+    webhook_url = config['Slack']['webhook_url']
+    payload = {
+        "text": message
+    }
+    response = requests.post(webhook_url, json=payload)
+    if response.status_code == 200:
+        print("Slack notification sent successfully!")
+    else:
+        print(f"Failed to send Slack notification. Status Code: {response.status_code}")
 
 source_directory = os.path.expanduser('~/Documents')
 backup_directory = os.path.expanduser('~/backups')
@@ -29,3 +47,4 @@ for filename in os.listdir(source_directory):
 
 
 print("Files copied successfully")
+send_slack_notification("Backup Completed: Your backup was successfully completed.")
