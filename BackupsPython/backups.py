@@ -13,15 +13,26 @@ config = configparser.ConfigParser()
 config.read(config_path)
 
 def send_slack_notification(message):
-    webhook_url = config['Slack']['webhook_url']
-    payload = {
-        "text": message
-    }
-    response = requests.post(webhook_url, json=payload)
-    if response.status_code == 200:
-        print("Slack notification sent successfully!")
-    else:
-        print(f"Failed to send Slack notification. Status Code: {response.status_code}")
+    try:
+        # Load webhook from config file
+        webhook_url = config['Slack']['webhook_url']
+        payload = {
+            "text": message
+        }
+        # Send request to Slack
+        response = requests.post(webhook_url, json=payload)
+
+        # Check if request was successful
+        if response.status_code == 200:
+            print("Slack notification sent successfully!")
+        else:
+            print(f"Failed to send Slack notification. Status Code: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending notification. An HTTP error occurred: {e}")
+    except KeyError:
+        print("Error: Webhook URL not found in configuration file.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 source_directory = os.path.expanduser('~/Documents')
 backup_directory = os.path.expanduser('~/backups')
