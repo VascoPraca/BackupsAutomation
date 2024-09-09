@@ -34,12 +34,18 @@ def send_slack_notification(message):
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
-source_directory = os.path.expanduser('~/Documents')
-backup_directory = os.path.expanduser('~/backups')
-
 # Get current date in YYYY-MM-DD format
 date_str = datetime.now().strftime('%Y-%m-%d')
 
+
+# Get backup directory from config file
+try:
+    backup_directory = config['Paths']['backup_directory']
+    source_directories = config['Paths']['source_directories'].split(',')
+    source_directories = [directory.strip() for directory in source_directories] # Strip any extra whitespace
+except KeyError as e:
+    print(f"Configuration error: {e}. Make sure the paths are defined in the config file.")
+    exit(1)
 
 # Check if backup directory exists
 try:
@@ -49,24 +55,31 @@ except OSError as e:
     print(f"Error creating backup directory: {e}")
     exit(1)
 
-# Copy each file, appending the date to the filename
-for filename in os.listdir(source_directory):
-    source_file = os.path.join(source_directory, filename)
-    
-    # Append date before file extension
-    base, extension = os.path.splitext(filename)
-    backup_filename = f"{base}_{date_str}{extension}"
-    backup_file = os.path.join(backup_directory, backup_filename)
+# Loop over each source directory
+for source_directory in source_directories:
+    # Check if the source directory exists
+    if not os.path.exists(source_directory):
+        print(f"Source directory does not exist: {source_directory}")
+        continue
 
-    try:
-        shutil.copy2(source_file, backup_file)
-        print(f"Copied: {filename} -> {backup_filename}")
-    except FileNotFoundError as e:
-        print(f"Error: {e}. File not found: {source_file}")
-    except PermissionError as e:
-        print(f"Error: {e}. Permission denied for: {source_file}")
-    except OSError as e:
-        print(f"OS error occured: {e} when copying {source_file}")
+    # Copy each file, appending the date to the filename
+    for filename in os.listdir(source_directory):
+        source_file = os.path.join(source_directory, filename)
+
+        # Append date before file extension
+        base, extension = os.path.splitext(filename)
+        backup_filename = f"{base}_{date_str}{extension}"
+        backup_file = os.path.join(backup_directory, backup_filename)
+
+        try:
+            shutil.copy2(source_file, backup_file)
+            print(f"Copied: {filename} -> {backup_filename}")
+        except FileNotFoundError as e:
+            print(f"Error: {e}. File not found: {source_file}")
+        except PermissionError as e:
+            print(f"Error: {e}. Permission denied for: {source_file}")
+        except OSError as e:
+            print(f"OS error occured: {e} when copying {source_file}")
 
 # Define retention policy
 retention_days = 7
